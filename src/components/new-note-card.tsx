@@ -36,9 +36,8 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
     toast.success("Nota criada com sucesso!");
   }
 
-  function handleStartRecording() {}
-
-  const isSpeechRecognitionAPIAvailable =
+  function handleStartRecording() {
+    const isSpeechRecognitionAPIAvailable =
     "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
   if (!isSpeechRecognitionAPIAvailable) {
     alert("Infelizmente seu navegador não suporta a API de gravação!");
@@ -70,6 +69,7 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   };
 
   speechRecognition.start();
+  }
 
   function handleStopRecording() {
     setIsRecording(false);
