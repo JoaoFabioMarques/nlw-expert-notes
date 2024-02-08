@@ -1,20 +1,55 @@
 import { NoteCard } from "./components/note-card.tsx";
-import { NewNoteCard } from "./components/new-note-card.tsx"
+import { NewNoteCard } from "./components/new-note-card.tsx";
 import logo from "/assets/logo-nlw-expert.svg";
+import { ChangeEvent, useState } from "react";
 
-const note={
-  date: new Date(),
-  content: 'Hello World'
-}
-
-const newnote={
-  date: new Date(),
-  content: 'teste'
+interface Note {
+  id: string;
+  date: Date;
+  content: string;
 }
 
 export function App() {
+  const [search, setSearch] = useState("");
+  const [notes, setNotes] = useState<Note[]>(() => {
+    const notesOnStorage = localStorage.getItem("notes");
+
+    if (notesOnStorage) {
+      return JSON.parse(notesOnStorage);
+    }
+
+    return [];
+  });
+
+  function onNoteCreated(content: string) {
+    const newNote = {
+      id: crypto.randomUUID(),
+      date: new Date(),
+      content,
+    };
+
+    const notesArray = [newNote, ...notes];
+
+    setNotes(notesArray);
+
+    localStorage.setItem("notes", JSON.stringify(notesArray));
+  }
+
+  function handleSearch(event: ChangeEvent<HTMLInputElement>) {
+    const query = event.target.value;
+
+    setSearch(query);
+  }
+
+  const filteredNotes =
+    search !== ""
+      ? notes.filter((note) =>
+          note.content.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+        )
+      : notes;
+
   return (
-    <div className="mx-auto max-w-6xl my-12 space-y-6">
+    <div className="mx-auto max-w-6xl my-12 space-y-6 px-5 md:px-0">
       <img src={logo} alt="NLW Expert" />
 
       <form className="w-full">
@@ -24,54 +59,17 @@ export function App() {
           className="w-full bg-transparent text-3xl font-semibold tracking-tight
           outline-none
           placeholder: text-slate-500"
+          onChange={handleSearch}
         />
       </form>
 
       <div className="h-px bg-slate-700" />
-      <div className="grid grid-cols-3 gap-6 auto-rows-[250px]">
-        
-        <NewNoteCard newnote={newnote}/>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[250px]">
+        <NewNoteCard onNoteCreated={onNoteCreated} />
 
-        <NoteCard note={note}/>
-
-        <div className="rounded-md bg-slate-800 p-5 space-y-3 overflow-hidden relative">
-          <span className="text-sm font-medium text-slate-300">Há 4 dias</span>
-          <p className="text-sm leading-6 text-slate-400">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus
-            temporibus sequi quam necessitatibus dolore officiis exercitationem
-            vitae quibusdam in, qui, sapiente deleniti, expedita numquam id
-            laborum voluptate quod. Blanditiis, aspernatur? Lorem ipsum dolor
-            sit amet consectetur adipisicing elit. Quis debitis soluta ullam
-            aspernatur repellendus doloremque dolor recusandae consequuntur
-            suscipit neque accusamus ipsam reiciendis laboriosam assumenda
-            nesciunt, voluptate eveniet? Est, odit.
-          </p>
-          <div
-            className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t
-          from-black/60 to-black/0 pointer-events-none"
-          />
-        </div>
-        <div className="rounded-md bg-slate-800 p-5 space-y-3 overflow-hidden relative">
-          <span className="text-sm font-medium text-slate-300">Há 5 dias</span>
-          <p className="text-sm leading-6 text-slate-400">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus
-            temporibus sequi quam necessitatibus dolore officiis exercitationem
-            vitae quibusdam in, qui, sapiente deleniti, expedita numquam id
-            laborum voluptate quod. Blanditiis, aspernatur? Lorem ipsum dolor
-            sit amet consectetur adipisicing elit. Quis debitis soluta ullam
-            aspernatur repellendus doloremque dolor recusandae consequuntur
-            suscipit neque accusamus ipsam reiciendis laboriosam assumenda
-            nesciunt, voluptate eveniet? Est, odit. Lorem ipsum dolor sit amet,
-            consectetur adipisicing elit. Ipsum, nobis perspiciatis. Esse velit,
-            earum odit natus mollitia assumenda ad aspernatur dicta sequi
-            sapiente praesentium rerum reprehenderit enim perspiciatis quae
-            sunt.
-          </p>
-          <div
-            className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t
-          from-black/60 to-black/0 pointer-events-none"
-          />
-        </div>
+        {filteredNotes.map((note) => {
+          return <NoteCard key={note.id} note={note} />;
+        })}
       </div>
     </div>
   );
